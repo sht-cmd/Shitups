@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shitups — Ridiculously bad startup ideas, presented seriously.</title>
+
+  <!-- Google Fonts: Syne (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ─────────────────────────────────────────
+       CSS VARIABLES & RESET
+    ───────────────────────────────────────── */
+    :root {
+      --bg:        #080c14;
+      --surface:   #0f1623;
+      --surface2:  #161e2e;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #f97316;        /* orange */
+      --accent2:   #fb923c;
+      --indigo:    #6366f1;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --success:   #22d3ee;
+      --radius:    14px;
+      --shadow:    0 4px 32px rgba(0,0,0,0.5);
+      --transition: 0.2s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────
+       NOISE TEXTURE OVERLAY (subtle depth)
+    ───────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ─────────────────────────────────────────
+       NAVBAR
+    ───────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 max(24px, 5vw);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--text); }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+
+    /* ─────────────────────────────────────────
+       BUTTONS
+    ───────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+      background: var(--surface);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-outline:hover {
+      background: var(--accent);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.3);
+    }
+
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px max(24px, 5vw) 60px;
+    }
+
+    /* Gradient orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent); top: 5%; left: -10%; animation-delay: 0s; }
+    .orb-2 { width: 400px; height: 400px; background: var(--indigo); top: 20%; right: -8%; animation-delay: -3s; }
+    .orb-3 { width: 300px; height: 300px; background: var(--accent); bottom: 10%; left: 30%; animation-delay: -6s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-24px); }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.25);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeInUp 0.6s ease both;
+    }
+
+    .hero-badge::before { content: '💩'; font-size: 1rem; }
+
+    h1.hero-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.6s 0.1s ease both;
+    }
+
+    h1.hero-title .accent { color: var(--accent); }
+
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      font-weight: 300;
+      animation: fadeInUp 0.6s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.6s 0.3s ease both;
+    }
+
+    .hero-actions .btn { padding: 12px 28px; font-size: 0.95rem; }
+
+    .hero-stats {
+      margin-top: 64px;
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.6s 0.4s ease both;
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─────────────────────────────────────────
+       FEED SECTION
+    ───────────────────────────────────────── */
+    #feed {
+      padding: 80px max(24px, 5vw);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* Sort tabs */
+    .sort-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .sort-tab {
+      padding: 7px 18px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: var(--transition);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .sort-tab.active {
+      background: var(--surface2);
+      color: var(--text);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+
+    /* ─────────────────────────────────────────
+       IDEA CARDS GRID
+    ───────────────────────────────────────── */
+    #ideas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .idea-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .idea-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--indigo));
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .idea-card:hover {
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .idea-card:hover::before { opacity: 1; }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Upvote button */
+    .upvote-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .upvote-btn:hover:not(.voted) {
+      border-color: var(--accent);
+      background: rgba(249,115,22,0.08);
+    }
+
+    .upvote-btn.voted {
+      border-color: var(--accent);
+      background: rgba(249,115,22,0.12);
+      color: var(--accent);
+    }
+
+    .upvote-arrow { font-size: 0.9rem; line-height: 1; }
+    .upvote-count { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+    .upvote-btn.voted .upvote-count { color: var(--accent); }
+
+    /* Card sections */
+    .card-section { display: flex; flex-direction: column; gap: 4px; }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .card-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.5;
+      opacity: 0.85;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      color: #a5b4fc;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .card-time { font-size: 0.75rem; color: var(--muted); }
+
+    /* ─────────────────────────────────────────
+       LOADING & EMPTY STATES
+    ───────────────────────────────────────── */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      height: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .skeleton-line {
+      background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.04) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state p { font-size: 1rem; }
+
+    /* ─────────────────────────────────────────
+       SUBMIT MODAL
+    ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-subtitle { font-size: 0.875rem; color: var(--muted); margin-top: 4px; }
+
+    .modal-close {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 1.2rem;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .modal-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    /* Form */
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      padding: 12px 16px;
+      width: 100%;
+      transition: var(--transition);
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input[type="text"] { min-height: unset; resize: none; }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+    .submit-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-color: rgba(34,211,238,0.3); }
+    #toast.error   { border-color: rgba(239,68,68,0.3); }
+
+    /* ─────────────────────────────────────────
+       SUPABASE CONFIG BANNER
+    ───────────────────────────────────────── */
+    #config-banner {
+      background: rgba(249,115,22,0.08);
+      border-bottom: 1px solid rgba(249,115,22,0.2);
+      padding: 12px max(24px, 5vw);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      flex-wrap: wrap;
+    }
+
+    #config-banner strong { color: var(--accent); }
+    #config-banner code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #a5b4fc;
+    }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .hero-stats { gap: 28px; }
+      .modal { padding: 28px 20px; }
+      .submit-row { flex-direction: column; }
+      .submit-row .btn { width: 100%; justify-content: center; }
+      #config-banner { font-size: 0.8rem; }
+    }
+.card-image {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  object-fit: cover;
+  max-height: 180px;
+}
+
+/* Better spacing between sections */
+.card-section {
+  padding-top: 6px;
+}
+
+/* Clamp long text (makes cards consistent height) */
+.card-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Subtle hover reveal (optional fancy) */
+.idea-card:hover .card-text {
+  -webkit-line-clamp: unset;
+}
+.card-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.reaction-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.reaction-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+  </style>
+</head>
+<body>
+
+ 
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav>
+    <a href="#" class="nav-logo">Shit<span>ups</span></a>
+    <div class="nav-links">
+      <a href="#feed" class="btn btn-ghost">Browse</a>
+      <button class="btn btn-primary" onclick="openModal()">Submit Idea</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       HERO
+  ══════════════════════════════════════ -->
+  <section id="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="hero-badge">Now in public beta</div>
+
+    <h1 class="hero-title">Shit<span class="accent">ups</span></h1>
+
+    <p class="hero-tagline">
+      Ridiculously bad startup ideas, presented seriously.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="openModal()">
+        💡 Submit Idea
+      </button>
+      <a href="#feed" class="btn btn-outline">Browse Ideas</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-ideas">—</div>
+        <div class="stat-label">Ideas Submitted</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-votes">—</div>
+        <div class="stat-label">Total Votes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Venture Funding (needed)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FEED
+  ══════════════════════════════════════ -->
+  <section id="feed">
+    <div class="section-header">
+      <h2 class="section-title">💩 Latest Ventures</h2>
+      <div class="sort-tabs">
+        <button class="sort-tab active" data-sort="newest" onclick="setSort('newest', this)">Newest</button>
+        <button class="sort-tab" data-sort="top" onclick="setSort('top', this)">Top</button>
+      </div>
+    </div>
+
+    <!-- Cards render here -->
+    <div id="ideas-grid"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SUBMIT MODAL
+  ══════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Pitch Your Disaster</div>
+          <div class="modal-subtitle">Make it sound like a Series A deck.</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label for="input-title">Startup Name / Title</label>
+        <input type="text" id="input-title" placeholder="e.g. Uber for Socks" maxlength="80" />
+      </div>
+
+      <div class="form-group">
+        <label for="input-problem">The Problem</label>
+        <textarea id="input-problem" placeholder="What catastrophic global issue are you solving?" rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="input-solution">The Solution</label>
+        <textarea id="input-solution" placeholder="Describe your world-changing, AI-powered, blockchain-enabled solution." rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="input-monetization">Monetization Strategy</label>
+        <textarea id="input-monetization" placeholder="How does it make money? (Spoiler: it doesn't.)" rows="2"></textarea>
+      </div>
+       <div class="form-group">
+  <label for="input-image">Startup Logo / Image (optional)</label>
+  <input type="file" id="input-image" accept="image/*" />
+</div>
+      <div class="submit-row">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitIdea()">
+          🚀 Launch Startup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast"></div>
+
+  <!-- ══════════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════════ -->
+ <script>
+const SUPABASE_URL  = 'https://jaqvbzvxrwlddhzelooc.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXZienZ4cndsZGRoemVsb29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjI5NTIsImV4cCI6MjA5MzEzODk1Mn0.bRI8Sa-xgIOxoi1rZGDlsxmmEUcQKEWZ_b1VERdgpJE';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const votedKey = 'shitups_voted';
+const getVoted = () => JSON.parse(localStorage.getItem(votedKey) || '[]');
+const addVoted = (id) => {
+  const v = getVoted();
+  v.push(id);
+  localStorage.setItem(votedKey, JSON.stringify(v));
+};
+
+let currentSort = 'newest';
+let allIdeas = [];
+
+// FETCH
+async function fetchIdeas() {
+  showSkeletons();
+  try {
+    const orderCol = currentSort === 'top' ? 'votes' : 'created_at';
+    const { data, error } = await db
+      .from('ideas')
+      .select('*')
+      .order(orderCol, { ascending: false });
+
+    if (error) throw error;
+    allIdeas = data || [];
+    renderIdeas(allIdeas);
+    updateStats(allIdeas);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// RENDER
+function renderIdeas(ideas) {
+  if (!ideas.length) {
+    showGrid('<p>No ideas yet</p>');
+    return;
+  }
+
+  const voted = getVoted();
+
+  const html = ideas.map(idea => `
+  <div class="idea-card">
+
+    ${idea.image_url ? `
+      <img src="${idea.image_url}" class="card-image" />
+    ` : ''}
+
+    <div class="card-header">
+      <div class="card-title">${escHtml(idea.title)}</div>
+
+      <button class="upvote-btn ${voted.includes(idea.id) ? 'voted' : ''}"
+        onclick="upvote('${idea.id}', this)">
+        <div class="upvote-arrow">▲ vote</div>
+        <div class="upvote-count">${idea.votes || 0}</div>
+      </button>
+    </div>
+
+    ${idea.problem ? `
+      <div class="card-section">
+        <div class="card-label">Problem</div>
+        <div class="card-text">${escHtml(idea.problem)}</div>
+      </div>
+    ` : ''}
+
+    ${idea.solution ? `
+      <div class="card-section">
+        <div class="card-label">Solution</div>
+        <div class="card-text">${escHtml(idea.solution)}</div>
+      </div>
+    ` : ''}
+
+    ${idea.monetization ? `
+      <div class="card-section">
+        <div class="card-label">💰 Monetization</div>
+        <div class="card-text">${escHtml(idea.monetization)}</div>
+      </div>
+    ` : ''}
+     <div class="card-reactions">
+  ${renderReactions(idea)}
+</div>
+    <div class="card-footer">
+      <div class="card-tag">Startup</div>
+      <div class="card-time">${timeAgo(idea.created_at)}</div>
+    </div>
+
+  </div>
+`).join('');
+
+  showGrid(html);
+}
+
+// UPVOTE
+async function upvote(id, btn) {
+  if (btn.disabled) return;
+  btn.disabled = true;
+
+  const current = parseInt(btn.textContent.replace('▲','')) || 0;
+  btn.textContent = `▲ ${current + 1}`;
+  addVoted(id);
+
+  try {
+    const { data } = await db.from('ideas').select('votes').eq('id', id).single();
+    const newVotes = (data?.votes || 0) + 1;
+
+    await db.from('ideas').update({ votes: newVotes }).eq('id', id);
+    btn.textContent = `▲ ${newVotes}`;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// SUBMIT
+async function submitIdea() {
+  const title = document.getElementById('input-title').value.trim();
+  const problem = document.getElementById('input-problem').value.trim();
+  const solution = document.getElementById('input-solution').value.trim();
+  const monetization = document.getElementById('input-monetization').value.trim();
+
+  // ⚠️ FIX: your HTML has NO image input → prevent crash
+  const imageInputEl = document.getElementById('input-image');
+  const fileInput = imageInputEl ? imageInputEl.files[0] : null;
+
+  let imageUrl = null;
+
+  if (!title || !problem || !solution || !monetization) {
+    alert('Fill all fields');
+    return;
+  }
+
+  if (fileInput) {
+    const fileName = `${Date.now()}-${fileInput.name}`;
+
+    const { error } = await db.storage
+      .from('ideas-images')
+      .upload(fileName, fileInput);
+
+    if (error) {
+      console.error(error);
+      alert('Image upload failed');
+      return;
+    }
+
+    const { data } = db.storage
+      .from('ideas-images')
+      .getPublicUrl(fileName);
+
+    imageUrl = data.publicUrl;
+  }
+
+  await db.from('ideas').insert([{
+    title,
+    problem,
+    solution,
+    monetization,
+    votes: 0,
+    image_url: imageUrl
+  }]);
+
+  closeModal();
+  fetchIdeas();
+}
+
+// SORT
+function setSort(sort, el) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  fetchIdeas();
+}
+
+// MODAL
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'modal-overlay') closeModal();
+}
+
+// HELPERS
+function showSkeletons() {
+  document.getElementById('ideas-grid').innerHTML = 'Loading...';
+}
+
+function showGrid(html) {
+  document.getElementById('ideas-grid').innerHTML = html;
+}
+
+function updateStats(ideas) {
+  document.getElementById('stat-ideas').textContent = ideas.length;
+  document.getElementById('stat-votes').textContent =
+    ideas.reduce((sum, i) => sum + (i.votes || 0), 0);
+}
+
+function escHtml(str) {
+  return str
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+function timeAgo(date) {
+  if (!date) return '';
+
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+  const intervals = {
+    year: 31536000,
+    month: 2592000,
+    day: 86400,
+    hour: 3600,
+    minute: 60
+  };
+
+  for (let key in intervals) {
+    const value = Math.floor(seconds / intervals[key]);
+    if (value > 0) {
+      return `${value} ${key}${value > 1 ? 's' : ''} ago`;
+    }
+  }
+
+  return 'just now';
+}
+const EMOJIS = ['🤣','🤑','😈','🤬','🤮','💩','🤡','💀','👽'];
+
+function renderReactions(idea) {
+  const reactions = idea.reactions || {};
+
+  return EMOJIS.map(e => `
+    <button class="reaction-btn"
+      onclick="react('${idea.id}', '${e}', this)">
+      ${e} <span>${reactions[e] || 0}</span>
+    </button>
+  `).join('');
+}
+async function react(id, emoji, btn) {
+  btn.disabled = true;
+
+  // optimistic UI
+  const span = btn.querySelector('span');
+  span.textContent = parseInt(span.textContent) + 1;
+
+  try {
+    const { data } = await db
+      .from('ideas')
+      .select('reactions')
+      .eq('id', id)
+      .single();
+
+    const reactions = data?.reactions || {};
+    reactions[emoji] = (reactions[emoji] || 0) + 1;
+
+    await db
+      .from('ideas')
+      .update({ reactions })
+      .eq('id', id);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// INIT
+fetchIdeas();
+</script>
+</body>
+</html>
