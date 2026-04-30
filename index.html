@@ -696,6 +696,17 @@
   color: var(--text);
   transform: translateY(-1px);
 }
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
   </style>
 </head>
 <body>
@@ -705,7 +716,10 @@
        NAVBAR
   ══════════════════════════════════════ -->
   <nav>
-    <a href="#" class="nav-logo">Shit<span>ups</span></a>
+   <a href="#" class="nav-logo">
+  <img src="logo.png" alt="logo" class="logo-img">
+  Shit<span>ups</span>
+   </a>
     <div class="nav-links">
       <a href="#feed" class="btn btn-ghost">Browse</a>
       <button class="btn btn-primary" onclick="openModal()">Submit Idea</button>
