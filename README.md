@@ -1,8 +1,12 @@
 # Shitups
-Real Owner: [sakib-12345(github)](https://github.com/sakib-12345/)
 
 *Shitups is a simple app for sharing and browsing intentionally Crazy startup ideas.*
 
+Real Owner: [sakib-12345(github)](https://github.com/sakib-12345/) 
+
+- Starups ❌
+- Shitups ✅
+  
 web url: [Shit ups](https://sht-cmd.github.io/Shitups/)
 
 <p align="center">
@@ -12,6 +16,6 @@ web url: [Shit ups](https://sht-cmd.github.io/Shitups/)
 
 
 
-Users can submit ideas, vote on them, and locally hide anything they don’t want to see. Deletions are stored in the browser using localStorage, so they only affect your own view and don’t modify the database.
+Users can submit ideas, vote on them.
 
 The project focuses on simplicity over features. There’s no authentication, no heavy frontend framework, and no complex state management—just plain HTML, CSS, and JavaScript.
