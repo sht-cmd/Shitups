@@ -847,6 +847,37 @@
     transform: scale(0.98);
   }
 }
+    .footer {
+  border-top: 1px solid var(--border);
+  padding: 30px 16px;
+  text-align: center;
+  background: var(--bg);
+  margin-top: 60px;
+}
+
+.footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.footer-links {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
   </style>
 </head>
 <body>
@@ -861,7 +892,7 @@
   Shit<span>ups</span>
    </a>
     <div class="nav-links">
-      <a href="#feed" class="btn btn-ghost">Browse</a>
+      <a href="https://github.com/sht-cmd/Shitups/" class="btn btn-ghost">Github</a>
       <button class="btn btn-primary" onclick="openModal()">Submit Idea</button>
     </div>
   </nav>
@@ -1246,5 +1277,15 @@ async function react(id, emoji, btn) {
 // INIT
 fetchIdeas();
 </script>
+<footer class="footer">
+  <div class="footer-content">
+    <p>Built by Shakib</p>
+    
+    <div class="footer-links">
+      <a href="mailto:your@email.com">📧 Email</a>
+      <a href="https://github.com/yourusername" target="_blank">💻 GitHub</a>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
