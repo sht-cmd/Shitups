@@ -359,34 +359,45 @@
     }
 
     /* Upvote button */
-    .upvote-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      flex-shrink: 0;
-      font-family: 'DM Sans', sans-serif;
-    }
+   .upvote-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(249,115,22,0.08);
+  border: 1px solid rgba(249,115,22,0.35);
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
 
     .upvote-btn:hover:not(.voted) {
       border-color: var(--accent);
       background: rgba(249,115,22,0.08);
     }
 
-    .upvote-btn.voted {
-      border-color: var(--accent);
-      background: rgba(249,115,22,0.12);
-      color: var(--accent);
-    }
+   .upvote-btn.voted {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.2);
+  box-shadow: 0 0 12px rgba(249,115,22,0.25);
+}
+    .upvote-btn.voted .upvote-arrow {
+  color: #fff;
+}
 
-    .upvote-arrow { font-size: 0.9rem; line-height: 1; }
-    .upvote-count { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+    .upvote-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--accent);
+  font-weight: 900;
+}
+    .upvote-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
     .upvote-btn.voted .upvote-count { color: var(--accent); }
 
     /* Card sections */
@@ -1007,7 +1018,7 @@
  <script>
 const SUPABASE_URL  = 'https://jaqvbzvxrwlddhzelooc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXZienZ4cndsZGRoemVsb29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjI5NTIsImV4cCI6MjA5MzEzODk1Mn0.bRI8Sa-xgIOxoi1rZGDlsxmmEUcQKEWZ_b1VERdgpJE';
-
+let visibleCount = 6;
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -1050,57 +1061,72 @@ function renderIdeas(ideas) {
 
   const voted = getVoted();
 
-  const html = ideas.map(idea => `
-  <div class="idea-card">
+  const visibleIdeas = ideas.slice(0, visibleCount);
 
-    ${idea.image_url ? `
-      <img src="${idea.image_url}" class="card-image" />
-    ` : ''}
+  const html = visibleIdeas.map(idea => `
+    <div class="idea-card">
 
-    <div class="card-header">
-      <div class="card-title">${escHtml(idea.title)}</div>
+      ${idea.image_url ? `
+        <img src="${idea.image_url}" class="card-image" />
+      ` : ''}
 
-      <button class="upvote-btn ${voted.includes(idea.id) ? 'voted' : ''}"
-        onclick="upvote('${idea.id}', this)">
-        <div class="upvote-arrow">▲ vote</div>
-        <div class="upvote-count">${idea.votes || 0}</div>
-      </button>
+      <div class="card-header">
+        <div class="card-title">${escHtml(idea.title)}</div>
+
+        <button class="upvote-btn ${voted.includes(idea.id) ? 'voted' : ''}"
+          onclick="upvote('${idea.id}', this)">
+          <div class="upvote-arrow">▲</div>
+          <div class="upvote-count">${idea.votes || 0}</div>
+        </button>
+      </div>
+
+      ${idea.problem ? `
+        <div class="card-section">
+          <div class="card-label">Problem</div>
+          <div class="card-text">${escHtml(idea.problem)}</div>
+        </div>
+      ` : ''}
+
+      ${idea.solution ? `
+        <div class="card-section">
+          <div class="card-label">Solution</div>
+          <div class="card-text">${escHtml(idea.solution)}</div>
+        </div>
+      ` : ''}
+
+      ${idea.monetization ? `
+        <div class="card-section">
+          <div class="card-label">💰 Monetization</div>
+          <div class="card-text">${escHtml(idea.monetization)}</div>
+        </div>
+      ` : ''}
+
+      <div class="card-reactions">
+        ${renderReactions(idea)}
+      </div>
+
+      <div class="card-footer">
+        <div class="card-tag">Startup</div>
+        <div class="card-time">${timeAgo(idea.created_at)}</div>
+      </div>
+
     </div>
+  `).join('');
 
-    ${idea.problem ? `
-      <div class="card-section">
-        <div class="card-label">Problem</div>
-        <div class="card-text">${escHtml(idea.problem)}</div>
+  showGrid(html + `
+    ${ideas.length > visibleCount ? `
+      <div style="text-align:center; margin-top:20px;">
+        <button class="btn btn-outline" onclick="loadMore()">
+          Load More ↓
+        </button>
       </div>
     ` : ''}
-
-    ${idea.solution ? `
-      <div class="card-section">
-        <div class="card-label">Solution</div>
-        <div class="card-text">${escHtml(idea.solution)}</div>
-      </div>
-    ` : ''}
-
-    ${idea.monetization ? `
-      <div class="card-section">
-        <div class="card-label">💰 Monetization</div>
-        <div class="card-text">${escHtml(idea.monetization)}</div>
-      </div>
-    ` : ''}
-     <div class="card-reactions">
-  ${renderReactions(idea)}
-</div>
-    <div class="card-footer">
-      <div class="card-tag">Startup</div>
-      <div class="card-time">${timeAgo(idea.created_at)}</div>
-    </div>
-
-  </div>
-`).join('');
-
-  showGrid(html);
+  `);
 }
-
+function loadMore() {
+  visibleCount += 6;
+  renderIdeas(allIdeas);
+}
 // UPVOTE
 async function upvote(id, btn) {
   if (btn.disabled) return;
@@ -1174,6 +1200,7 @@ async function submitIdea() {
 
 // SORT
 function setSort(sort, el) {
+  visibleCount = 6;
   currentSort = sort;
   document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
