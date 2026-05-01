@@ -977,6 +977,11 @@
 .footer-links a:hover {
   color: var(--accent);
 }
+    .load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
   </style>
 </head>
 <body>
@@ -1171,7 +1176,7 @@ function renderIdeas(ideas) {
     showGrid('<p>No ideas yet</p>');
     return;
   }
-
+  document.querySelector('.load-more-wrap')?.remove();
   const voted = getVoted();
 
   const visibleIdeas = ideas.slice(0, visibleCount);
@@ -1241,15 +1246,20 @@ function renderIdeas(ideas) {
     </div>
   `).join('');
 
-  showGrid(html + `
-    ${ideas.length > visibleCount ? `
-      <div style="text-align:center; margin-top:20px;">
+   showGrid(html);
+
+  if (ideas.length > visibleCount) {
+    document.getElementById('ideas-grid').insertAdjacentHTML(
+      'afterend',
+      `
+      <div class="load-more-wrap">
         <button class="btn btn-outline" onclick="loadMore()">
           Load More ↓
         </button>
       </div>
-    ` : ''}
-  `);
+      `
+    );
+  }
 }
 function loadMore() {
   visibleCount += 6;
