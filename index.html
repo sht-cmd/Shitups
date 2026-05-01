@@ -381,11 +381,25 @@
    .upvote-btn.voted {
   border-color: var(--accent);
   background: rgba(249,115,22,0.2);
-  box-shadow: 0 0 12px rgba(249,115,22,0.25);
+  box-shadow: 0 0 14px rgba(249,115,22,0.35);
+  animation: voteGlow 0.35s ease-out;
 }
-    .upvote-btn.voted .upvote-arrow {
-  color: #fff;
+
+@keyframes voteGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(249,115,22,0);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 22px rgba(249,115,22,0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 14px rgba(249,115,22,0.35);
+  }
 }
+   
 
     .upvote-arrow {
   font-size: 1rem;
@@ -1127,21 +1141,44 @@ function loadMore() {
   visibleCount += 6;
   renderIdeas(allIdeas);
 }
-// UPVOTE
 async function upvote(id, btn) {
   if (btn.disabled) return;
+
   btn.disabled = true;
 
-  const current = parseInt(btn.textContent.replace('▲','')) || 0;
-  btn.textContent = `▲ ${current + 1}`;
+  // prevent double vote visually
+  btn.classList.add('voted');
+
+  // 💥 glow trigger reset trick
+  btn.style.animation = 'none';
+  void btn.offsetWidth; // force reflow
+  btn.style.animation = 'voteGlow 0.35s ease-out';
+
+  const countEl = btn.querySelector('.upvote-count');
+  let current = parseInt(countEl.textContent) || 0;
+
+  // optimistic UI update
+  countEl.textContent = current + 1;
+
   addVoted(id);
 
   try {
-    const { data } = await db.from('ideas').select('votes').eq('id', id).single();
+    const { data } = await db
+      .from('ideas')
+      .select('votes')
+      .eq('id', id)
+      .single();
+
     const newVotes = (data?.votes || 0) + 1;
 
-    await db.from('ideas').update({ votes: newVotes }).eq('id', id);
-    btn.textContent = `▲ ${newVotes}`;
+    await db
+      .from('ideas')
+      .update({ votes: newVotes })
+      .eq('id', id);
+
+    // sync final value
+    countEl.textContent = newVotes;
+
   } catch (err) {
     console.error(err);
   }
