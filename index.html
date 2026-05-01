@@ -635,7 +635,81 @@
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.success { border-color: rgba(34,211,238,0.3); }
     #toast.error   { border-color: rgba(239,68,68,0.3); }
+    /* COMMENTS TOAST */
+.comments-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%) translateY(120%);
+  width: min(520px, calc(100vw - 20px));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  z-index: 9999;
+  transition: 0.25s ease;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
 
+.comments-toast.open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.comments-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comments-body {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.comment-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.comment-author {
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.comment-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.comment-form {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+
+.comment-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: white;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
     /* ─────────────────────────────────────────
        SUPABASE CONFIG BANNER
     ───────────────────────────────────────── */
@@ -1025,7 +1099,32 @@
 
   <!-- Toast Notification -->
   <div id="toast"></div>
+  <!-- COMMENTS -->
+<div class="comments-toast" id="comments-toast">
+  <div class="comments-header">
+    <strong>Anonymous Comments</strong>
 
+    <button class="modal-close" onclick="closeComments()">✕</button>
+  </div>
+
+  <div class="comments-body" id="comments-body">
+    Loading...
+  </div>
+
+  <div class="comment-form">
+    <input
+      type="text"
+      id="comment-input"
+      class="comment-input"
+      placeholder="Type something stupid..."
+      maxlength="200"
+    />
+
+    <button class="btn btn-primary" onclick="submitComment()">
+      Send
+    </button>
+  </div>
+</div>
   <!-- ══════════════════════════════════════
        JAVASCRIPT
   ══════════════════════════════════════ -->
@@ -1120,9 +1219,24 @@ function renderIdeas(ideas) {
       </div>
 
       <div class="card-footer">
-        <div class="card-tag">Startup</div>
-        <div class="card-time">${timeAgo(idea.created_at)}</div>
-      </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+
+    
+
+    <button class="btn btn-primary"
+  style="
+    padding:6px 10px;
+    font-size:0.75rem;
+    border-radius:8px;
+  "
+  onclick="openComments('${idea.id}')">
+  Comment (${idea.comment_count || 0})
+</button>
+
+  </div>
+
+  <div class="card-time">${timeAgo(idea.created_at)}</div>
+</div>
 
     </div>
   `).join('');
@@ -1338,7 +1452,92 @@ async function react(id, emoji, btn) {
     console.error(err);
   }
 }
+let activeIdeaId = null;
 
+async function openComments(ideaId) {
+  activeIdeaId = ideaId;
+
+  document.getElementById('comments-toast')
+    .classList.add('open');
+
+  loadComments();
+}
+
+function closeComments() {
+  document.getElementById('comments-toast')
+    .classList.remove('open');
+}
+
+async function loadComments() {
+
+  const body = document.getElementById('comments-body');
+
+  body.innerHTML = 'Loading...';
+
+  const { data, error } = await db
+    .from('comments')
+    .select('*')
+    .eq('idea_id', activeIdeaId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    body.innerHTML = 'Failed loading comments';
+    return;
+  }
+
+  if (!data.length) {
+    body.innerHTML = `
+      <div style="color:var(--muted)">
+        No comments yet.
+      </div>
+    `;
+    return;
+  }
+
+  body.innerHTML = data.map(c => `
+    <div class="comment-item">
+      <div class="comment-author">
+        anonymous
+      </div>
+
+      <div class="comment-text">
+        ${escHtml(c.text)}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function submitComment() {
+
+  const input = document.getElementById('comment-input');
+
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  input.value = '';
+
+  await db.from('comments').insert([{
+    idea_id: activeIdeaId,
+    text
+  }]);
+  await db
+  .from('ideas')
+  .update({
+    comment_count:
+      (allIdeas.find(i => i.id === activeIdeaId)?.comment_count || 0) + 1
+  })
+  .eq('id', activeIdeaId);
+  await loadComments();
+
+  // update count locally
+  const idea = allIdeas.find(i => i.id === activeIdeaId);
+
+  if (idea) {
+    idea.comment_count = (idea.comment_count || 0) + 1;
+    renderIdeas(allIdeas);
+  }
+}
 // INIT
 fetchIdeas();
 </script>
