@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community & Safety</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#080c14;
+  --surface:#0f1623;
+  --border:rgba(255,255,255,0.07);
+  --accent:#f97316;
+  --text:#e2e8f0;
+  --muted:#64748b;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+
+/* HERO */
+.hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:80px 16px 40px;
+}
+
+/* BIG LOGO */
+.logo{
+  width:clamp(300px, 30vw, 220px);
+  margin-bottom:20px;
+}
+
+/* TITLE */
+.hero h1{
+  font-family:'Syne';
+  font-size:clamp(2rem, 7vw, 3.5rem);
+  line-height:1.1;
+}
+
+.hero p{
+  color:var(--muted);
+  margin-top:10px;
+  max-width:500px;
+  font-size:0.9rem;
+}
+
+/* CONTENT */
+.container{
+  max-width:820px;
+  margin:auto;
+  padding:20px 16px 60px;
+}
+
+/* CARD */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  transition:0.25s;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,255,255,0.15);
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.title{
+  font-family:'Syne';
+  font-size:1.05rem;
+  margin-bottom:8px;
+}
+
+.text{
+  color:var(--muted);
+  font-size:0.85rem;
+}
+
+/* BUTTON */
+.btn{
+  display:inline-block;
+  margin-top:16px;
+  padding:10px 18px;
+  border-radius:8px;
+  background:var(--accent);
+  color:white;
+  text-decoration:none;
+  font-size:0.85rem;
+  transition:0.2s;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(249,115,22,0.3);
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  padding:30px 16px;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  font-size:0.8rem;
+}
+
+/* DESKTOP */
+@media(min-width:768px){
+
+  .hero{
+    padding:100px 20px 50px;
+  }
+
+  .hero p{
+    font-size:1rem;
+  }
+
+  .card{
+    padding:24px;
+  }
+
+  .title{
+    font-size:1.2rem;
+  }
+
+  .text{
+    font-size:0.95rem;
+  }
+
+  .btn{
+    font-size:0.9rem;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<section class="hero">
+
+  <!-- 🔥 BIG LOGO -->
+  <a href='https://sht-cmd.github.io/Shitups/'><img src="about.png" class="logo" alt="logo"></a>
+
+  <h2>🛡️ Community & Safety</h2>
+
+  <p>
+    This platform is built for humor — not harm.
+    Everything here is satire, meant to entertain.
+  </p>
+
+</section>
+
+<!-- CONTENT -->
+<section class="container">
+
+  <div class="card">
+    <div class="title">⚠️ About the Content</div>
+    <div class="text">
+      Ideas on this platform are intentionally absurd, exaggerated, and not meant to be taken seriously.
+      It’s all jokes and creativity.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">💬 If Something Feels Off</div>
+    <div class="text">
+      If any idea feels uncomfortable or offensive, you can report it.
+      We review feedback and aim to keep things enjoyable for everyone.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">🚫 Boundaries</div>
+    <div class="text">
+      Content promoting hate, harassment, or real harm is not allowed — even as a joke.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">📩 Contact</div>
+    <div class="text">
+      Found something problematic? Reach out anytime.
+    </div>
+
+    <!-- 🔥 CHANGE EMAIL -->
+    <a href="mailto:sakibhossaintahmid@email.com" class="btn">
+      Report an Idea
+    </a>
+  </div>
+
+</section>
+
+<footer class="footer">
+  Keep it fun. Keep it respectful. 🚀
+</footer>
+
+</body>
+</html>
