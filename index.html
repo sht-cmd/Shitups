@@ -1136,7 +1136,7 @@
  <script>
 const SUPABASE_URL  = 'https://jaqvbzvxrwlddhzelooc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXZienZ4cndsZGRoemVsb29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjI5NTIsImV4cCI6MjA5MzEzODk1Mn0.bRI8Sa-xgIOxoi1rZGDlsxmmEUcQKEWZ_b1VERdgpJE';
-let visibleCount = 6;
+let visibleCount = 4;
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -1262,7 +1262,7 @@ function renderIdeas(ideas) {
   }
 }
 function loadMore() {
-  visibleCount += 6;
+  visibleCount += 4;
   renderIdeas(allIdeas);
 }
 async function upvote(id, btn) {
@@ -1361,7 +1361,7 @@ async function submitIdea() {
 
 // SORT
 function setSort(sort, el) {
-  visibleCount = 6;
+  visibleCount = 4;
   currentSort = sort;
   document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
