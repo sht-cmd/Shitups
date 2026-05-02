@@ -1319,7 +1319,7 @@ async function submitIdea() {
   const imageInputEl = document.getElementById('input-image');
   const fileInput = imageInputEl ? imageInputEl.files[0] : null;
 
-  let imageUrl = null;
+  let imageUrl = 'https://jaqvbzvxrwlddhzelooc.supabase.co/storage/v1/object/public/ideas-images/Airbrush-image-extender.jpeg';
 
   if (!title || !problem || !solution || !monetization) {
     alert('Fill all fields');
